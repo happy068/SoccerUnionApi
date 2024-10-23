@@ -407,7 +407,7 @@ cbc0b11733b785b0317f1cc7d6f20fd8
 
 
 
-### <span id="3-----">2 接口列表 - 联盟版</span>
+### <span id="3-----">3 接口列表 - 联盟版</span>
 
 ​    
 
@@ -415,7 +415,7 @@ cbc0b11733b785b0317f1cc7d6f20fd8
 
 本接口用于主网向反波系统发送用户信息，以实现用户信息的传递，实现用户无感知登录反波系统。将用户ID和用户名发给接口之后，反波系统会自动判断该会员是否存在，如果不存在会自动注册。
 
-请求地址：`{apiAddress}/union-api/user-info`
+请求地址：`{apiAddress}/union-api-v2/user-info`
 
 ##### <span id="311-----">3.1.1 传入参数</span>
 
@@ -423,6 +423,7 @@ cbc0b11733b785b0317f1cc7d6f20fd8
 | --------- | ---- | ------ | --------------- | -------- |
 | memberId   | 是   | int | 0 < length < 11 | 用户ID |
 | userName  | 是   | string | 1 < length < 50 | 用户名     |
+| agentToken  | 是   | string | 1 < length < 50 | 代理识别码     |
 | sign  | 是   | string | 32 | 签名     |
 
 ##### <span id="312-----">3.1.2 返回参数</span>
@@ -476,13 +477,15 @@ cbc0b11733b785b0317f1cc7d6f20fd8
 
 郑重提示，主网如需对用户余额进行更新，请务必先调用本接口，接口成功返回后，以接口中的余额为准，切勿自行在主网进行余额更新，以免被人抓住漏洞，在主网和反波网站同时操作余额而导致资金错乱。
 
-请求地址：`{apiAddress}/union-api/user-balance`
+请求地址：`{apiAddress}/union-api-v2/user-balance`
 
 ##### <span id="321-----">3.2.1 传入参数</span>
 
 | 参数名    | 必选 | 类型   | 字段长度        | 说明     |
 | --------- | ---- | ------ | --------------- | -------- |
-| memberId   | 是   | int | 0 < length < 11 | 用户ID |
+| memberId   |    | int | 0 < length < 11 | 用户ID，memberId和userName必须传一个，不可同时传 |
+| userName  |    | string | 1 < length < 50 | 用户名，memberId和userName必须传一个，不可同时传     |
+| agentToken  | 是   | string | 1 < length < 50 | 代理识别码     |
 | actionType  | 是   | string | 1 < length < 50 | check=查看余额 update=更新余额     |
 | value  | 是/否   | decimal | 长度15，小数点2位 | check时无需传此参数，update时为必传，且不能为0     |
 | sign  | 是   | string | 32 | 签名     |
@@ -502,6 +505,18 @@ cbc0b11733b785b0317f1cc7d6f20fd8
 ```json
 {
 	"memberId": 1001,
+	"agentToken": "827ccb0eea8a706c4c34a16891f84e7b",
+	"actionType": "check",
+	"sign": "cbc0b11733b785b0317f1cc7d6f20fd8"
+}
+```
+
+或
+
+```json
+{
+	"userName": "zhangsan",
+	"agentToken": "827ccb0eea8a706c4c34a16891f84e7b",
 	"actionType": "check",
 	"sign": "cbc0b11733b785b0317f1cc7d6f20fd8"
 }
@@ -532,6 +547,7 @@ cbc0b11733b785b0317f1cc7d6f20fd8
 ```json
 {
 	"memberId": 1001,
+	"agentToken": "827ccb0eea8a706c4c34a16891f84e7b",
 	"actionType": "update",
 	"value": "800.00", //说明用户想充值800
 	"sign": "cbc0b11733b785b0317f1cc7d6f20fd8"
@@ -541,6 +557,7 @@ cbc0b11733b785b0317f1cc7d6f20fd8
 ```json
 {
 	"memberId": 1001,
+	"agentToken": "827ccb0eea8a706c4c34a16891f84e7b",
 	"actionType": "update",
 	"value": "-800.00", //说明用户想扣除余额800
 	"sign": "cbc0b11733b785b0317f1cc7d6f20fd8"
@@ -575,15 +592,19 @@ cbc0b11733b785b0317f1cc7d6f20fd8
 
 用于查询会员的历史订单
 
-请求地址：`{apiAddress}/union-api/user-orders`
+请求地址：`{apiAddress}/union-api-v2/user-orders`
 
 ##### <span id="331-----">3.3.1 传入参数</span>
 
 | 参数名    | 必选 | 类型   | 字段长度        | 说明     |
 | --------- | ---- | ------ | --------------- | -------- |
-| memberId   | 否   | int | 0 < length < 11 | 用户ID，如果不传会返回所有用户的订单 |
-| startTime  | 是   | datetime | - | 搜索下单时间：开始时间(包含这一秒)     |
-| endTime  | 是   | datetime | - | 搜索下单时间：结束时间(不包含这一秒)     |
+| memberId   | 否   | int | 0 < length < 11 | 用户ID，可不传 |
+| userName  |  否  | string | 1 < length < 50 | 用户名，可不传     |
+| agentToken  | 是   | string | 1 < length < 50 | 代理识别码     |
+| startTime  | 是   | datetime | - | 下单时间：开始时间(包含这一秒)     |
+| endTime  | 是   | datetime | - | 下单时间：结束时间(不包含这一秒)     |
+| startUpdatedTime  | 是   | datetime | - | 更新时间：开始时间(包含这一秒)     |
+| endUpdatedTime  | 是   | datetime | - | 更新时间：结束时间(不包含这一秒)     |
 | pageId  | 否   | int | 1 <= length <= 3 | 页码，留空则自动拉取第1页，每页最多返回1000条     |
 | sort  | 否   | string | 3 <= length <= 4 | asc=正序，desc=倒序，留空则默认为desc    |
 | sign  | 是   | string | 32 | 签名     |
@@ -631,8 +652,8 @@ cbc0b11733b785b0317f1cc7d6f20fd8
 ```json
 {
 	"memberId": 1001,
-	"startTime": "2021-10-01 00:00:00",
-	"endTime": "2021-10-01 23:59:59",
+	"startUpdatedTime": "2021-10-01 00:00:00",
+	"endUpdatedTime": "2021-10-01 23:59:59",
 	"pageId": 1,
 	"sort": "desc",
 	"sign": "cbc0b11733b785b0317f1cc7d6f20fd8"
