@@ -407,6 +407,9 @@ cbc0b11733b785b0317f1cc7d6f20fd8
 
 
 
+
+
+
 ### <span id="3-----">3 接口列表 - 联盟版</span>
 
 ​    
@@ -487,6 +490,7 @@ cbc0b11733b785b0317f1cc7d6f20fd8
 | userName  |    | string | 1 < length < 50 | 用户名，memberId和userName必须传一个，不可同时传     |
 | agentToken  | 是   | string | 1 < length < 50 | 代理识别码     |
 | actionType  | 是   | string | 1 < length < 50 | check=查看余额 update=更新余额     |
+| clientOrderId  |    | string | 1 < length < 100 | update时，该参数必填，后续可用于查询更新余额结果     |
 | value  | 是/否   | decimal | 长度15，小数点2位 | check时无需传此参数，update时为必传，且不能为0     |
 | sign  | 是   | string | 32 | 签名     |
 
@@ -549,6 +553,7 @@ cbc0b11733b785b0317f1cc7d6f20fd8
 	"memberId": 1001,
 	"agentToken": "827ccb0eea8a706c4c34a16891f84e7b",
 	"actionType": "update",
+	"clientOrderId": "AB12345",
 	"value": "800.00", //说明用户想充值800
 	"sign": "cbc0b11733b785b0317f1cc7d6f20fd8"
 }
@@ -559,6 +564,7 @@ cbc0b11733b785b0317f1cc7d6f20fd8
 	"memberId": 1001,
 	"agentToken": "827ccb0eea8a706c4c34a16891f84e7b",
 	"actionType": "update",
+	"clientOrderId": "AB12345",
 	"value": "-800.00", //说明用户想扣除余额800
 	"sign": "cbc0b11733b785b0317f1cc7d6f20fd8"
 }
@@ -725,6 +731,66 @@ cbc0b11733b785b0317f1cc7d6f20fd8
 	"data": [],
 	"totalPages": null,
 	"msg": "页码不存在"
+}
+```
+
+
+​    
+​    
+
+#### <span id="34-----">3.4 余额更新结果查询</span>
+
+更新会员余额后，可通过此接口查询更新状态
+
+请求地址：`{apiAddress}/union-api-v2/balance-update-results`
+
+##### <span id="341-----">3.4.1 传入参数</span>
+
+| 参数名    | 必选 | 类型   | 字段长度        | 说明     |
+| --------- | ---- | ------ | --------------- | -------- |
+| clientOrderId  |    | string | 1 < length < 100 | 更新余额时传入的查询订单号，多订单号用｜隔开，最多支持同时查询100个订单     |
+| sign  | 是   | string | 32 | 签名     |
+
+##### <span id="342-----">3.4.2 返回参数</span>
+
+| 参数名     | 类型   | 字段长度        | 说明     |
+| ---------  | ------ | --------------- | -------- |
+| result      | int | 1 | 调用结果，1=成功 0=失败 |
+| data     | array | - | 查询结果  |
+| msg     | string | 1 < length < 100 | 如出错时，返回出错原因，成功时为success |
+
+##### <span id="343-----">3.4.3 调用示例</span>
+
+ - 传入参数
+
+```json
+{
+	"clientOrderId": "AB123|AB124|AB125",
+	"sign": "cbc0b11733b785b0317f1cc7d6f20fd8"
+}
+```
+
+ - 返回参数（成功）
+
+```json
+{
+	"result": 1,
+	"data": {
+		"AB123": "success",
+		"AB124": "failed",
+		"AB125": "success"
+	},
+	"msg": "success"
+}
+```
+
+ - 返回参数（失败）
+
+```json
+{
+	"result": 0,
+	"data": [],
+	"msg": "查询记录数不可超过100，当前请求数122"
 }
 ```
 
